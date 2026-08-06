@@ -1,10 +1,4 @@
-import logging
-from datetime import date
-from pathlib import Path as FilePath
-from time import perf_counter
-
-from fastapi import FastAPI, HTTPException, Path, Query, Request
-from fastapi.responses import PlainTextResponse
+from fastapi import FastAPI, Query, Path
 from pydantic import BaseModel, Field
 from typing import Annotated
 
@@ -98,7 +92,6 @@ class Item(BaseModel):
     description: str | None = None
     price: float
     tax: float | None = None
-
 
 @app.get("/")
 def read_root():
