@@ -16,6 +16,7 @@ APP_LOGGER = logging.getLogger("book_api")
 
 
 def setup_logging() -> None:
+    """Configure file-based logging for the application and Uvicorn loggers."""
     LOG_DIR.mkdir(exist_ok=True)
 
     root_logger = logging.getLogger()
@@ -60,12 +61,14 @@ def setup_logging() -> None:
 
 @app.on_event("startup")
 def configure_application_logging() -> None:
+    """Initialize logging configuration when the application starts."""
     setup_logging()
     APP_LOGGER.info("Application logging configured")
 
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
+    """Log each HTTP request with method, path, status code, and latency."""
     start_time = perf_counter()
 
     try:
@@ -98,11 +101,13 @@ class Item(BaseModel):
 
 @app.get("/")
 def read_root():
+    """Return a simple greeting from the root endpoint."""
     return {"Hello": "Chijiuba Victory"}
 
 
 @app.get("/logs/{day}", response_class=PlainTextResponse)
 def read_logs_for_day(day: date):
+    """Return all log lines recorded for the provided date (YYYY-MM-DD)."""
     if not LOG_FILE.exists():
         raise HTTPException(status_code=404, detail="No logs have been recorded yet")
 
@@ -122,12 +127,14 @@ def read_logs_for_day(day: date):
 
 @app.get("/items/")
 async def read_items(q: Annotated[list[str] | None, Query()] = None):
+    """Return optional query values passed to the items listing endpoint."""
     query_items = {"q": q}
     return query_items
 
 
 @app.get("/items/{item_id}")
 async def read_item(item_id: Annotated[int, Path(max_length=50, min_length=3, title="Item ID")], q: Annotated[str | None, Query(max_length=50, min_length=3)] = None, short: bool = False):
+    """Return one item and optionally include extra description and query context."""
     item = {"item_id": item_id}
     if q:
         item.update({"q": q})
@@ -140,6 +147,7 @@ async def read_item(item_id: Annotated[int, Path(max_length=50, min_length=3, ti
 
 @app.post("/items/")
 async def create_item(item: Item):
+    """Create an item payload and include computed price with tax when provided."""
     item_dict = item.model_dump()
     if item.tax is not None:
         price_with_tax = item.price + item.tax
@@ -149,4 +157,5 @@ async def create_item(item: Item):
 
 @app.put("/items/{item_id}")
 async def update_item(item_id: int, item: Item):
+    """Update an item by returning the provided item data with its ID."""
     return {"item_id": item_id, **item.model_dump()}
