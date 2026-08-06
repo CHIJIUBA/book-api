@@ -29,7 +29,7 @@ def setup_logging() -> None:
         and FilePath(getattr(handler, "baseFilename", "")).resolve() == LOG_FILE.resolve()
         for handler in root_logger.handlers
     )
-    
+
 
     if not file_handler_exists:
         file_handler = logging.FileHandler(LOG_FILE, encoding="utf-8")
