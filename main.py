@@ -99,7 +99,6 @@ class Item(BaseModel):
     price: float
     tax: float | None = None
 
-
 @app.get("/")
 def read_root():
     """Return a simple greeting from the root endpoint."""
